@@ -64,3 +64,21 @@ jobs:
 
       - name: Build WASM
         run: cargo build --release --target wasm32-unknown-unknown
+
+    orphaned-scripts-check:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v4
+
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '18'
+
+        - name: Install dependencies (if any)
+          run: |
+            if [ -f package.json ]; then npm ci || true; fi
+
+        - name: Run orphaned-scripts detector
+          run: node scripts/check-orphaned-scripts.js
