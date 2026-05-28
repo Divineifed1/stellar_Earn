@@ -13,11 +13,33 @@ build:
 test:
     cargo test
 
+# Fast unit tests only — same subset the pre-commit hook runs
+test-fast:
+    cargo test --lib
+
 fmt:
     cargo fmt
 
 clippy:
     cargo clippy --all-targets --all-features -- -D warnings
+
+# Run fmt check + clippy + fast tests (mirrors the pre-commit hook locally)
+pre-commit-check:
+    cargo fmt --all -- --check
+    cargo clippy --all-targets --all-features -- -D warnings
+    cargo test --lib
+
+# Install pre-commit hooks into .git/hooks/
+install-hooks:
+    bash ../../scripts/install-hooks.sh
+
+# Verify hooks are installed
+check-hooks:
+    bash ../../scripts/install-hooks.sh --check
+
+# Remove project hooks from .git/hooks/
+remove-hooks:
+    bash ../../scripts/install-hooks.sh --remove
 
 deploy:
     if [ -z "$SOROBAN_SECRET_KEY" ]; then
