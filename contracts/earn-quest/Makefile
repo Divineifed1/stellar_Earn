@@ -2,7 +2,7 @@ CRATE := earn-quest
 WASM := $(shell ls target/wasm32-unknown-unknown/release/*.wasm 2>/dev/null | head -n1)
 NETWORK ?= testnet
 
-.PHONY: help test test-verbose build fmt clippy deploy invoke-register license-check deny-check migration-dry-run migration-apply snapshots snapshots-clean snapshots-verify snapshots-restore snapshots-backup snapshots-stats snapshots-admin snapshots-quest snapshots-payout snapshots-security clean clean-all
+.PHONY: help test test-verbose test-fast build fmt clippy deploy invoke-register license-check deny-check migration-dry-run migration-apply snapshots snapshots-clean snapshots-verify snapshots-restore snapshots-backup snapshots-stats snapshots-admin snapshots-quest snapshots-payout snapshots-security clean clean-all install-hooks check-hooks remove-hooks
 
 # Default target
 help:
@@ -13,10 +13,16 @@ help:
 	@echo "  make build               - Build the contract for wasm32"
 	@echo "  make test                - Run all tests"
 	@echo "  make test-verbose        - Run tests with verbose output"
+	@echo "  make test-fast           - Run fast unit tests only (same as pre-commit hook)"
 	@echo "  make fmt                 - Format code with cargo fmt"
 	@echo "  make clippy              - Run linter (clippy)"
 	@echo "  make license-check       - Run cargo-deny license checks"
 	@echo "  make deny-check          - Run cargo-deny advisory and license checks"
+	@echo ""
+	@echo "Git Hooks:"
+	@echo "  make install-hooks       - Install pre-commit hooks into .git/hooks/"
+	@echo "  make check-hooks         - Verify hooks are installed"
+	@echo "  make remove-hooks        - Uninstall project hooks"
 	@echo ""
 	@echo "Stellar / Soroban Deployment & Interaction:"
 	@echo "  make deploy              - Deploy the compiled WASM to the network"
@@ -62,10 +68,31 @@ fmt:
 	@echo "Formatting code..."
 	cargo fmt
 
+# Run fast unit tests only (lib crate, no integration tests — matches pre-commit hook)
+test-fast:
+	@echo "Running fast unit tests..."
+	cargo test --lib
+
 # Run code compliance checks
 clippy:
 	@echo "Running clippy linter..."
 	cargo clippy --all-targets --all-features -- -D warnings
+
+# ── Git hooks ─────────────────────────────────────────────────────────────────
+
+# Install pre-commit hooks into .git/hooks/
+install-hooks:
+	@echo "Installing git hooks..."
+	@bash ../../scripts/install-hooks.sh
+	@echo "Done. Hooks will run automatically on 'git commit'."
+
+# Verify hooks are installed
+check-hooks:
+	@bash ../../scripts/install-hooks.sh --check
+
+# Remove project hooks from .git/hooks/
+remove-hooks:
+	@bash ../../scripts/install-hooks.sh --remove
 
 # Deploy contract to Stellar network
 deploy:

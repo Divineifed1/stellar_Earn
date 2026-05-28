@@ -25,10 +25,44 @@ cargo build
 cargo build --target wasm32-unknown-unknown --release
 ```
 
+### Development Setup (Git Hooks)
+
+After cloning, install the pre-commit hooks so `cargo fmt`, `clippy`, and fast unit
+tests run automatically before every commit to contract files:
+
+```bash
+# From the repo root
+bash scripts/install-hooks.sh
+
+# Or from this directory via Make / just
+make install-hooks
+just install-hooks
+```
+
+The hook only fires when `.rs` or `.toml` files inside `contracts/earn-quest/` are
+staged — other commits are unaffected.
+
+To run the same checks manually at any time:
+
+```bash
+make pre-commit-check        # via Make
+just pre-commit-check        # via just
+```
+
+To bypass the hook in an emergency:
+
+```bash
+SKIP_CONTRACT_HOOKS=1 git commit -m "..."
+```
+
 ### Test
 ```bash
 # Run all tests
 cargo test
+
+# Run fast unit tests only (same subset the pre-commit hook uses)
+cargo test --lib
+make test-fast
 
 # Run with output
 cargo test -- --nocapture
