@@ -27,6 +27,13 @@ import type {
   QuestQueryParams,
 } from '@/lib/types/api.types';
 
+const QUEST_LIST_TTL_MS = 3 * 60 * 1000;
+const QUEST_LIST_STALE_TTL_MS = 10 * 60 * 1000;
+
+type QuestListCacheOptions = {
+  onRevalidate?: (data: PaginatedQuestsResponse) => void;
+};
+
 // Re-export legacy types for backward compatibility with existing hooks
 export type {
   QuestFilters,
@@ -47,12 +54,13 @@ export type {
 export async function getQuests(
   filters?: QuestQueryParams,
   cancelToken?: CancelToken,
-  timeout?: number
+  timeout?: number,
+  cacheOptions?: QuestListCacheOptions
 ): Promise<PaginatedQuestsResponse> {
   const params = buildQuestParams(filters);
   const cacheKey = `${generateQuestsCacheKey(params)}${timeout ? `:t-${timeout}` : ''}`;
 
-  return cacheManager.get(
+  return cacheManager.getStaleWhileRevalidate(
     cacheKey,
     () =>
       withRetry(() =>
@@ -62,7 +70,11 @@ export async function getQuests(
           timeout,
         })
       ),
-    3 * 60 * 1000 // 3 minutes TTL
+    {
+      ttl: QUEST_LIST_TTL_MS,
+      staleTtl: QUEST_LIST_STALE_TTL_MS,
+      onRevalidate: cacheOptions?.onRevalidate,
+    }
   );
 }
 

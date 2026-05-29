@@ -49,7 +49,12 @@ function FeaturedQuestsContent() {
     setError(null);
 
     try {
-      const res = await getQuests(TAB_PARAMS[activeFilter], cancelRef.current, customTimeout);
+      const res = await getQuests(TAB_PARAMS[activeFilter], cancelRef.current, customTimeout, {
+        onRevalidate: (fresh) => {
+          const freshItems = (fresh as any).data ?? (fresh as any).quests ?? [];
+          setQuests(freshItems);
+        },
+      });
       const items = (res as any).data ?? (res as any).quests ?? [];
       setQuests(items);
       setRetryCount(0); // Reset retry count on success

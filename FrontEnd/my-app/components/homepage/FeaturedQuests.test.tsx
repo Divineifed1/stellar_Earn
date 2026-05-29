@@ -87,7 +87,12 @@ describe('FeaturedQuests - Error Boundary and Timeout Integration', () => {
 
     await waitFor(() => {
       // Verify second call is made with 60000ms custom timeout
-      expect(mockGetQuests).toHaveBeenLastCalledWith(expect.any(Object), expect.any(Object), 60000);
+      expect(mockGetQuests).toHaveBeenLastCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+        60000,
+        expect.objectContaining({ onRevalidate: expect.any(Function) })
+      );
     });
   });
 
