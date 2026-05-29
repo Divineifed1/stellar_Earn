@@ -70,31 +70,40 @@ function SubmissionsContent() {
   const hasMore = currentPage < totalPages;
 
   // Update URL when filter changes
-  const handleStatusChange = useCallback((status: SubmissionStatus | undefined) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (status) {
-      params.set('status', status);
-    } else {
-      params.delete('status');
-    }
-    params.set('page', '1'); // Reset to first page when filter changes
-    router.push(`/submissions?${params.toString()}`);
-  }, [router, searchParams]);
+  const handleStatusChange = useCallback(
+    (status: SubmissionStatus | undefined) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (status) {
+        params.set('status', status);
+      } else {
+        params.delete('status');
+      }
+      params.set('page', '1'); // Reset to first page when filter changes
+      router.push(`/submissions?${params.toString()}`);
+    },
+    [router, searchParams]
+  );
 
   // Update URL when page changes
-  const handlePageChange = useCallback((page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', page.toString());
-    router.push(`/submissions?${params.toString()}`);
-  }, [router, searchParams]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('page', page.toString());
+      router.push(`/submissions?${params.toString()}`);
+    },
+    [router, searchParams]
+  );
 
-  const handleSearch = useCallback((query: string) => {
-    setSearchQuery(query);
-    // Reset to first page on search
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('page', '1');
-    router.push(`/submissions?${params.toString()}`);
-  }, [router, searchParams]);
+  const handleSearch = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      // Reset to first page on search
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('page', '1');
+      router.push(`/submissions?${params.toString()}`);
+    },
+    [router, searchParams]
+  );
 
   const handleSubmissionClick = useCallback((submission: Submission) => {
     setSelectedSubmission(submission);

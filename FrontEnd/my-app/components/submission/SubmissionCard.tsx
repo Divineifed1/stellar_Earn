@@ -10,7 +10,10 @@ interface SubmissionCardProps {
   onClick?: (submission: Submission) => void;
 }
 
-export const SubmissionCard = memo(function SubmissionCard({ submission, onClick }: SubmissionCardProps) {
+export const SubmissionCard = memo(function SubmissionCard({
+  submission,
+  onClick,
+}: SubmissionCardProps) {
   const handleClick = () => {
     onClick?.(submission);
   };

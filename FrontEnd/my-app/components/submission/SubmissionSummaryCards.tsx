@@ -11,7 +11,10 @@ interface SubmissionSummaryCardsProps {
 export const SubmissionSummaryCards = memo(function SubmissionSummaryCards({
   submissions,
 }: SubmissionSummaryCardsProps) {
-  const stats = getSubmissionStats(submissions);
+  const stats = getSubmissionStats(submissions as any);
+  const underReviewCount = submissions.filter(
+    (s) => s.status === 'Under Review'
+  ).length;
 
   const cards = [
     {
@@ -37,7 +40,7 @@ export const SubmissionSummaryCards = memo(function SubmissionSummaryCards({
     },
     {
       label: 'Under Review',
-      value: stats.underReview,
+      value: underReviewCount,
       borderColor: 'border-zinc-300 dark:border-zinc-700',
       bgColor: 'bg-white dark:bg-zinc-900',
       isHighlighted: false,

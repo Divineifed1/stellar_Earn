@@ -95,7 +95,7 @@ export const SubmissionsTable = memo(function SubmissionsTable({
                 </td>
                 <td
                   className={`whitespace-nowrap px-6 py-4 text-sm font-medium ${
-                    submission.quest.rewardAmount > 0
+                    Number(submission.quest.rewardAmount) > 0
                       ? 'text-orange-600 dark:text-orange-400'
                       : 'text-zinc-500 dark:text-zinc-400'
                   }`}
