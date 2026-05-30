@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Added the [Changelog Discipline Policy](docs/CHANGELOG_DISCIPLINE.md) to define how contract-breaking changes, migrations, and version bumps must be documented.
 - Added CI validation for contract changelog updates and breaking-change metadata so contract interface changes cannot merge without matching release notes.
 - Initialized this changelog so future contract releases have a single source of truth.
+- Added `gas_budget.rs` module defining explicit instruction-count ceilings per entrypoint (`init`, `reg_qst`, `sub_prf`, `appr_sub`, `clm_rwd`) and a `within_budget` helper for regression checks.
 
 ---
 
