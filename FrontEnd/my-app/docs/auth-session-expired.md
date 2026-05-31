@@ -40,13 +40,13 @@ The HTTP interceptor lives outside React, so a DOM `CustomEvent` (`session-expir
 
 ## Key Files
 
-| File | Role |
-|------|------|
-| `lib/api/client.ts` | Axios instance, token manager, response interceptor — refresh failure handling at lines 266-273 |
-| `components/auth/SessionManager.tsx` | Event listener + session-expired modal UI |
-| `components/auth/SessionManager.test.tsx` | Unit tests for the session-expired flow |
-| `lib/api/client.test.ts` | Unit tests for interceptor refresh-failure behavior (token clearing + event dispatch) |
-| `tests/e2e/auth.spec.ts` | E2E test for the session-expired modal appearance |
+| File                                      | Role                                                                                            |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `lib/api/client.ts`                       | Axios instance, token manager, response interceptor — refresh failure handling at lines 266-273 |
+| `components/auth/SessionManager.tsx`      | Event listener + session-expired modal UI                                                       |
+| `components/auth/SessionManager.test.tsx` | Unit tests for the session-expired flow                                                         |
+| `lib/api/client.test.ts`                  | Unit tests for interceptor refresh-failure behavior (token clearing + event dispatch)           |
+| `tests/e2e/auth.spec.ts`                  | E2E test for the session-expired modal appearance                                               |
 
 ---
 

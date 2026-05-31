@@ -61,7 +61,10 @@ describe('response interceptor - refresh failure', () => {
         return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }),
       http.post('http://localhost:3000/api/v1/auth/refresh', () => {
-        return HttpResponse.json({ message: 'Refresh failed' }, { status: 401 });
+        return HttpResponse.json(
+          { message: 'Refresh failed' },
+          { status: 401 }
+        );
       })
     );
 
@@ -86,7 +89,10 @@ describe('response interceptor - refresh failure', () => {
         return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }),
       http.post('http://localhost:3000/api/v1/auth/refresh', () => {
-        return HttpResponse.json({ message: 'Refresh failed' }, { status: 401 });
+        return HttpResponse.json(
+          { message: 'Refresh failed' },
+          { status: 401 }
+        );
       })
     );
 
@@ -103,4 +109,3 @@ describe('response interceptor - refresh failure', () => {
     window.removeEventListener('session-expired', eventSpy);
   });
 });
-

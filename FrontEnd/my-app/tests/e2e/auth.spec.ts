@@ -41,7 +41,9 @@ test.describe('Session Expired Flow', () => {
     });
   });
 
-  test('should show session expired modal when session-expired event is dispatched', async ({ page }) => {
+  test('should show session expired modal when session-expired event is dispatched', async ({
+    page,
+  }) => {
     // Inject stale tokens to simulate an authenticated session
     await page.addInitScript(() => {
       localStorage.setItem('stellar_earn_access_token', 'expired.header.sig');
@@ -62,11 +64,15 @@ test.describe('Session Expired Flow', () => {
     // Verify the session expired modal appears
     await expect(page.getByText('Session Expired')).toBeVisible();
     await expect(
-      page.getByText('Your session has expired. Please sign in again to continue.')
+      page.getByText(
+        'Your session has expired. Please sign in again to continue.'
+      )
     ).toBeVisible();
 
     // Verify action buttons are present
-    await expect(page.getByRole('button', { name: /connect wallet/i })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /connect wallet/i })
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: /dismiss/i })).toBeVisible();
   });
 });

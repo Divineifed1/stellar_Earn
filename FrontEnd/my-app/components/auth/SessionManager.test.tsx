@@ -51,7 +51,9 @@ describe('SessionManager', () => {
     });
 
     expect(
-      screen.getByText('Your session has expired. Please sign in again to continue.')
+      screen.getByText(
+        'Your session has expired. Please sign in again to continue.'
+      )
     ).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /connect wallet/i })
