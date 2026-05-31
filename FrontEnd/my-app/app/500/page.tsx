@@ -16,7 +16,7 @@ export default function ServerError() {
             Server Error
           </div>
           <p className="text-zinc-400 text-lg">
-            Something went wrong on our end. We're working to fix it.
+            Something went wrong on our end. We&apos;re working to fix it.
           </p>
         </div>
 

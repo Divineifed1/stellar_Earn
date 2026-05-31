@@ -206,7 +206,7 @@ describe('useAPIBootstrap', () => {
     );
 
     expect(result.current.error).toBeTruthy();
-    expect(result.current.error?.message).toMatch(/timeout/i);
+    expect(result.current.error?.message).toContain('timed out');
   });
 
   it('should provide isRecoverable flag', async () => {
@@ -254,6 +254,11 @@ describe('useAPIBootstrap', () => {
         onError: onErrorMock,
       })
     );
+
+    // Wait for initial load to finish
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
 
     // Trigger error on next call
     act(() => {

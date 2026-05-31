@@ -4,7 +4,7 @@ const FRONTEND_DIR = 'FrontEnd/my-app';
 const BACKEND_DIR = 'BackEnd';
 
 function buildCommands(cwd, command, files) {
-  const relativeFiles = files.map((file) => path.relative(cwd, file));
+  const relativeFiles = files.map((file) => path.relative(cwd, file).replace(/\\/g, '/'));
   if (relativeFiles.length === 0) {
     return [];
   }
@@ -25,6 +25,6 @@ module.exports = {
   'BackEnd/**/*.json': (files) =>
     buildCommands(BACKEND_DIR, 'prettier --write', files),
   '{scripts,tests}/**/*.{js,mjs,cjs,json,md,yml,yaml}': (files) => [
-    `npx prettier --write ${files.join(' ')}`,
+    `npx prettier --write ${files.map((file) => file.replace(/\\/g, '/')).join(' ')}`,
   ],
 };

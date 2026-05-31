@@ -16,7 +16,7 @@ export function RewardHistory({ claims }: RewardHistoryProps) {
       {claims.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-zinc-200 dark:border-zinc-800">
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            You haven't claimed any rewards yet.
+            You haven&apos;t claimed any rewards yet.
           </p>
         </div>
       ) : (

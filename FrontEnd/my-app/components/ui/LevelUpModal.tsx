@@ -177,7 +177,7 @@ export function LevelUpModal({ isOpen, newLevel, onClose }: LevelUpModalProps) {
 
               {/* Level Number */}
               <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-                You've reached Level {newLevel}!
+                You&apos;ve reached Level {newLevel}!
               </p>
 
               {/* Benefits */}

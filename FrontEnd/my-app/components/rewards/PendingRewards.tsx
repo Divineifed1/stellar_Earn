@@ -94,8 +94,7 @@ export function PendingRewards({ rewards }: PendingRewardsProps) {
                       {questTitle}
                     </h4>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      Approved on{' '}
-                      {new Date(submittedAt).toLocaleDateString()}
+                      Approved on {new Date(submittedAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>

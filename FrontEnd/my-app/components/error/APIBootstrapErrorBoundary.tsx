@@ -197,7 +197,7 @@ export class APIBootstrapErrorBoundary extends React.Component<
               You are offline
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 max-w-sm">
-              We couldn't connect to the server. You can still view cached
+              We couldn&apos;t connect to the server. You can still view cached
               content, but {componentName} needs an active connection.
             </p>
             <button

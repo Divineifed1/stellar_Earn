@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { RetryButton } from './RetryButton';
 
@@ -37,9 +38,9 @@ describe('RetryButton', () => {
   });
 
   it('shows loading state while retrying', async () => {
-    const onRetry = vi.fn(
+    const onRetry = vi.fn<() => Promise<void>>(
       () =>
-        new Promise((resolve) => {
+        new Promise<void>((resolve) => {
           setTimeout(resolve, 100);
         })
     );
@@ -55,9 +56,9 @@ describe('RetryButton', () => {
   });
 
   it('disables button while retrying', async () => {
-    const onRetry = vi.fn(
+    const onRetry = vi.fn<() => Promise<void>>(
       () =>
-        new Promise((resolve) => {
+        new Promise<void>((resolve) => {
           setTimeout(resolve, 100);
         })
     );
@@ -68,7 +69,7 @@ describe('RetryButton', () => {
     const button = screen.getByRole('button', { name: /retry/i });
     await user.click(button);
 
-    expect(button).toBeDisabled();
+    expect((button as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('displays custom button text', () => {
@@ -103,13 +104,18 @@ describe('RetryButton', () => {
       <RetryButton isVisible={true} isLoading={false} onRetry={onRetry} />
     );
 
-    expect(screen.getByRole('button', { name: /retry/i })).not.toBeDisabled();
+    expect(
+      (screen.getByRole('button', { name: /retry/i }) as HTMLButtonElement)
+        .disabled
+    ).toBe(false);
 
     rerender(
       <RetryButton isVisible={true} isLoading={true} onRetry={onRetry} />
     );
 
-    expect(screen.getByRole('button')).toBeDisabled();
+    expect((screen.getByRole('button') as HTMLButtonElement).disabled).toBe(
+      true
+    );
     expect(screen.getByText('Retrying...')).toBeInTheDocument();
   });
 
@@ -118,7 +124,7 @@ describe('RetryButton', () => {
     render(<RetryButton isVisible={true} onRetry={onRetry} fullWidth={true} />);
 
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('w-full');
+    expect(button.classList.contains('w-full')).toBe(true);
   });
 
   it('applies custom className', () => {
@@ -132,7 +138,7 @@ describe('RetryButton', () => {
     );
 
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('custom-class');
+    expect(button.classList.contains('custom-class')).toBe(true);
   });
 
   it('has proper accessibility attributes', () => {
@@ -140,7 +146,7 @@ describe('RetryButton', () => {
     render(<RetryButton isVisible={true} onRetry={onRetry} />);
 
     const button = screen.getByRole('button');
-    expect(button).toHaveAttribute('aria-label', 'Retry');
+    expect(button.getAttribute('aria-label')).toBe('Retry');
   });
 
   it('updates aria-busy when loading state changes', () => {
@@ -150,13 +156,13 @@ describe('RetryButton', () => {
     );
 
     let button = screen.getByRole('button');
-    expect(button).toHaveAttribute('aria-busy', 'false');
+    expect(button.getAttribute('aria-busy')).toBe('false');
 
     rerender(
       <RetryButton isVisible={true} isLoading={true} onRetry={onRetry} />
     );
 
     button = screen.getByRole('button');
-    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button.getAttribute('aria-busy')).toBe('true');
   });
 });

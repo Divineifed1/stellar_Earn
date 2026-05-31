@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import React from 'react';
 import { EnvValidator } from '@/components/providers/EnvValidator';
 
 /**
@@ -14,6 +15,7 @@ describe('EnvValidator Component - Unit Tests', () => {
   beforeEach(() => {
     // Clear environment variables before each test
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_API_BASE_URL = 'http://localhost:3000';
   });
 
   describe('Rendering - Valid Environment', () => {
@@ -96,6 +98,7 @@ describe('EnvValidator Component - Unit Tests', () => {
 
       // Mock environment variable as missing
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -117,6 +120,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display error icon', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -138,6 +142,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display "Configuration Error" heading', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -151,7 +156,9 @@ describe('EnvValidator Component - Unit Tests', () => {
           name: /configuration error/i,
         });
         expect(heading).toBeInTheDocument();
-        expect(heading).toHaveClass('text-red-500', 'text-2xl', 'font-bold');
+        expect(heading.classList.contains('text-red-500')).toBe(true);
+        expect(heading.classList.contains('text-2xl')).toBe(true);
+        expect(heading.classList.contains('font-bold')).toBe(true);
       });
 
       if (originalEnv) {
@@ -164,6 +171,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display missing environment variable names in error message', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -186,6 +194,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display error message with bullet points', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -210,6 +219,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should include error descriptions for each variable', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -232,6 +242,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display "How to fix this" section', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -252,6 +263,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display fix instructions as ordered list', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -277,6 +289,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should include step about creating .env.local file', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -297,6 +310,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display example configuration block', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -327,6 +341,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display error message in pre-formatted code block', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -349,6 +364,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display example configuration in code block', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -360,7 +376,10 @@ describe('EnvValidator Component - Unit Tests', () => {
       await waitFor(() => {
         const exampleText = screen.getByText(/http:\/\/localhost:3001/);
         expect(exampleText).toBeInTheDocument();
-        expect(exampleText).toHaveClass('font-mono', 'whitespace-pre-wrap');
+        expect(exampleText.classList.contains('font-mono')).toBe(true);
+        expect(exampleText.classList.contains('whitespace-pre-wrap')).toBe(
+          true
+        );
       });
 
       if (originalEnv) {
@@ -373,6 +392,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should have proper heading hierarchy', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -398,6 +418,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should have alt text for error icon', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -419,6 +440,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should have README link with proper href', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -429,7 +451,7 @@ describe('EnvValidator Component - Unit Tests', () => {
 
       await waitFor(() => {
         const link = screen.getByRole('link', { name: /README\.md/i });
-        expect(link).toHaveAttribute('href', '/README.md');
+        expect(link.getAttribute('href')).toBe('/README.md');
       });
 
       if (originalEnv) {
@@ -440,7 +462,7 @@ describe('EnvValidator Component - Unit Tests', () => {
 
   describe('Error Handling', () => {
     it('should catch validation errors gracefully', async () => {
-      const TestContent = () => <div>Content</div>;
+      const TestContent = () => <div data-testid="test-content">Content</div>;
 
       render(
         <EnvValidator>
@@ -457,6 +479,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should display appropriate message for unexpected errors', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       render(
@@ -483,6 +506,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should have full height background when showing error', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       const { container } = render(
@@ -494,7 +518,7 @@ describe('EnvValidator Component - Unit Tests', () => {
       await waitFor(() => {
         const mainContainer = container.querySelector('.min-h-screen');
         expect(mainContainer).toBeInTheDocument();
-        expect(mainContainer).toHaveClass('bg-zinc-950');
+        expect(mainContainer?.classList.contains('bg-zinc-950')).toBe(true);
       });
 
       if (originalEnv) {
@@ -505,6 +529,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should center error panel on screen', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       const { container } = render(
@@ -528,6 +553,7 @@ describe('EnvValidator Component - Unit Tests', () => {
     it('should have responsive padding on mobile', async () => {
       const TestContent = () => <div>Content</div>;
       const originalEnv = process.env.NEXT_PUBLIC_API_BASE_URL;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (process.env as any).NEXT_PUBLIC_API_BASE_URL;
 
       const { container } = render(

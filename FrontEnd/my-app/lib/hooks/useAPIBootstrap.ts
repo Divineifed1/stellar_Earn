@@ -73,6 +73,7 @@ export function useAPIBootstrap<T>(
   const cancelRef = useRef<AbortController | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
+  const retryCountRef = useRef(0);
 
   /**
    * Execute the fetch with retry logic and error handling
@@ -129,7 +130,7 @@ export function useAPIBootstrap<T>(
         contexts: {
           bootstrap: {
             componentName,
-            retryCount: state.retryCount + 1,
+            retryCount: retryCountRef.current,
             timestamp: new Date().toISOString(),
           },
         },
@@ -150,20 +151,13 @@ export function useAPIBootstrap<T>(
 
       throw error;
     }
-  }, [
-    fetchFn,
-    retries,
-    initialDelay,
-    onError,
-    componentName,
-    timeout,
-    state.retryCount,
-  ]);
+  }, [fetchFn, retries, initialDelay, onError, componentName, timeout]);
 
   /**
    * Manual retry function for user-initiated retries
    */
   const retry = useCallback(async () => {
+    retryCountRef.current += 1;
     if (isMountedRef.current) {
       setState((prev) => ({
         ...prev,
@@ -185,6 +179,7 @@ export function useAPIBootstrap<T>(
    * Reset to initial state
    */
   const reset = useCallback(() => {
+    retryCountRef.current = 0;
     if (isMountedRef.current) {
       setState({
         data: null,
@@ -210,7 +205,10 @@ export function useAPIBootstrap<T>(
    * Initial data fetch on mount
    */
   useEffect(() => {
-    executeFetch();
+    isMountedRef.current = true;
+    executeFetch().catch(() => {
+      // Error is already logged and handled inside executeFetch
+    });
 
     // Cleanup on unmount
     return () => {

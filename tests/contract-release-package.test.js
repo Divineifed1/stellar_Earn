@@ -36,7 +36,7 @@ function testBuildReleasePackage() {
       target: 'wasm32-unknown-unknown',
       toolchain: 'rustc 1.0.0',
       artifact: 'target/wasm32-unknown-unknown/release/earn_quest.wasm',
-      artifactSizeBytes: 17,
+      artifactSizeBytes: 16,
       artifactHash: crypto.createHash('sha256').update('fake-wasm-binary').digest('hex'),
       artifactHashAlgorithm: 'sha256'
     });
@@ -47,7 +47,7 @@ function testBuildReleasePackage() {
 
     assert.strictEqual(path.basename(result.releaseDir), 'release');
     assert.strictEqual(manifest.artifact, 'earn_quest.wasm');
-    assert.strictEqual(manifest.artifactSizeBytes, 17);
+    assert.strictEqual(manifest.artifactSizeBytes, 16);
     assert.strictEqual(manifest.artifactHash, crypto.createHash('sha256').update('fake-wasm-binary').digest('hex'));
     assert.ok(checksum.includes('earn_quest.wasm'));
     assert.ok(fs.existsSync(result.releaseWasm), 'WASM artifact should be copied into release directory');

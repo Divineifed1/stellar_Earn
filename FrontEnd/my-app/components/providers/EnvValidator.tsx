@@ -7,7 +7,7 @@
  * and displays a user-friendly error page if validation fails.
  */
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Client-side validation for NEXT_PUBLIC_* variables.
 // Next.js only inlines these into the browser bundle when you use **static**
@@ -99,6 +99,7 @@ export function EnvValidator({ children }: EnvValidatorProps) {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                role="img"
               >
                 <path
                   strokeLinecap="round"

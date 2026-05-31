@@ -31,24 +31,31 @@ interface RetryButtonProps {
  */
 export function RetryButton({
   isVisible,
-  isLoading = false,
+  isLoading: controlledLoading,
   onRetry,
   buttonText = 'Retry',
   className = '',
   fullWidth = false,
 }: RetryButtonProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isLoading =
+    controlledLoading !== undefined ? controlledLoading : internalLoading;
 
   if (!isVisible) return null;
 
   const handleClick = async () => {
     setError(null);
+    setInternalLoading(true);
     try {
       await onRetry();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Retry failed. Please try again.';
       setError(message);
+    } finally {
+      setInternalLoading(false);
     }
   };
 
@@ -65,7 +72,7 @@ export function RetryButton({
         onClick={handleClick}
         disabled={isLoading}
         className={`${baseClasses} ${sizeClasses} ${stateClasses} ${className}`}
-        aria-label={isLoading ? 'Retrying request...' : 'Retry'}
+        aria-label={isLoading ? 'Retrying request...' : buttonText}
         aria-busy={isLoading}
       >
         <RotateCcw

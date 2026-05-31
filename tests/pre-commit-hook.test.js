@@ -9,11 +9,13 @@ function testPreCommitHookExistsAndIsExecutable() {
   assert.ok(fs.existsSync(PRE_COMMIT_HOOK), "pre-commit hook should exist");
   const stats = fs.statSync(PRE_COMMIT_HOOK);
   assert.ok(stats.isFile());
-  assert.notStrictEqual(
-    stats.mode & 0o111,
-    0,
-    "pre-commit hook should be executable",
-  );
+  if (process.platform !== "win32") {
+    assert.notStrictEqual(
+      stats.mode & 0o111,
+      0,
+      "pre-commit hook should be executable",
+    );
+  }
 }
 
 function testPreCommitHookRunsContractAndLintStagedChecks() {

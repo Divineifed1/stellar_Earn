@@ -50,6 +50,9 @@ _None yet._
 
 ### 鉁� Added
 
+- **Skeleton loading states for async card grids** ([FE-050](https://github.com/Kappa16/stellar_Earn/issues/050)).
+  - Improved user experience with loading state indicators while fetching data.
+  - Enhanced API client and validation modules for better async handling.
 - **Frontend changelog policy** for breaking type / model changes
   ([FE-068](https://github.com/Kappa16/stellar_Earn/issues/068)).
     - New canonical `FrontEnd/my-app/CHANGELOG.md` (this file).

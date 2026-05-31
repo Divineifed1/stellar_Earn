@@ -58,7 +58,9 @@ describe('APIBootstrapErrorBoundary', () => {
       </APIBootstrapErrorBoundary>
     );
 
-    const retryButton = screen.getByRole('button', { name: /Try Again/i });
+    const retryButton = screen.getByRole('button', {
+      name: /Try loading TestComponent again/i,
+    });
     expect(retryButton).toBeInTheDocument();
   });
 
@@ -86,7 +88,9 @@ describe('APIBootstrapErrorBoundary', () => {
     shouldThrow = false;
 
     // Click retry button
-    const retryButton = screen.getByRole('button', { name: /Try Again/i });
+    const retryButton = screen.getByRole('button', {
+      name: /Try loading TestComponent again/i,
+    });
     fireEvent.click(retryButton);
 
     // Rerender to update
@@ -125,6 +129,7 @@ describe('APIBootstrapErrorBoundary', () => {
   });
 
   it('should use custom fallback component when provided', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const CustomFallback = ({ error, resetError, componentName }: any) => (
       <div>
         Custom Fallback: {componentName} - {error.message}
@@ -169,7 +174,9 @@ describe('APIBootstrapErrorBoundary', () => {
 
     // Click retry button multiple times
     for (let i = 0; i < 3; i++) {
-      const retryButton = screen.getByRole('button', { name: /Try Again/i });
+      const retryButton = screen.getByRole('button', {
+        name: /Try loading TestComponent again/i,
+      });
       fireEvent.click(retryButton);
     }
 
@@ -190,7 +197,7 @@ describe('APIBootstrapErrorBoundary', () => {
       </APIBootstrapErrorBoundary>
     );
 
-    const homeButton = screen.getByRole('button', { name: /Go Home/i });
+    const homeButton = screen.getByRole('button', { name: /Go to homepage/i });
     expect(homeButton).toBeInTheDocument();
   });
 
@@ -318,7 +325,7 @@ describe('BootstrapErrorFallback', () => {
 
   it('should show error details in development mode', () => {
     const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    (process.env as Record<string, string>).NODE_ENV = 'development';
 
     const error = new Error('Test error stack trace');
     error.stack = 'Error: Test error\n  at Function.test';
@@ -337,6 +344,6 @@ describe('BootstrapErrorFallback', () => {
 
     expect(screen.getByText(/Test error stack trace/i)).toBeInTheDocument();
 
-    process.env.NODE_ENV = originalEnv;
+    (process.env as Record<string, string>).NODE_ENV = originalEnv;
   });
 });
