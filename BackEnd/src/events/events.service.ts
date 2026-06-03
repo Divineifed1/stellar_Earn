@@ -24,11 +24,7 @@ export class EventStoreService {
   private events: StoredEvent[] = [];
   private failedEvents: StoredEvent[] = [];
 
-  async saveEvent(
-    type: string,
-    payload: any,
-    metadata?: EventMetadata,
-  ): Promise<string> {
+  async saveEvent(type: string, payload: any, metadata?: EventMetadata): Promise<string> {
     const event: StoredEvent = {
       id: `evt_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
       type,
@@ -42,10 +38,10 @@ export class EventStoreService {
   }
 
   async markAsFailed(eventId: string, error: string): Promise<void> {
-    const event = this.events.find((e) => e.id === eventId);
+    const event = this.events.find(e => e.id === eventId);
     if (event) {
       event.retryCount += 1;
-      if (!this.failedEvents.find((e) => e.id === eventId)) {
+      if (!this.failedEvents.find(e => e.id === eventId)) {
         this.failedEvents.push(event);
       }
     }
@@ -62,11 +58,7 @@ export class EventsService {
 
   constructor(private readonly eventStore: EventStoreService) {}
 
-  async emit(
-    type: string,
-    payload: any,
-    metadata?: EventMetadata,
-  ): Promise<void> {
+  async emit(type: string, payload: any, metadata?: EventMetadata): Promise<void> {
     await this.eventStore.saveEvent(type, payload, metadata);
   }
 }
@@ -81,9 +73,7 @@ export class AuditLogService {
     resource: string;
     details?: any;
   }): Promise<void> {
-    this.logger.log(
-      `AUDIT: ${metadata.action} on ${metadata.resource} by ${metadata.userId || 'anonymous'}`,
-    );
+    this.logger.log(`AUDIT: ${metadata.action} on ${metadata.resource} by ${metadata.userId || 'anonymous'}`);
   }
 }
 
@@ -91,10 +81,7 @@ export class AuditLogService {
 export class RetryService {
   private readonly logger = new Logger(RetryService.name);
 
-  async scheduleRetry(
-    operation: () => Promise<any>,
-    maxAttempts: number = 3,
-  ): Promise<any> {
+  async scheduleRetry(operation: () => Promise<any>, maxAttempts: number = 3): Promise<any> {
     let lastError: Error | null = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -103,7 +90,7 @@ export class RetryService {
         lastError = error instanceof Error ? error : new Error(String(error));
         if (attempt < maxAttempts) {
           const delay = Math.pow(2, attempt) * 1000; // exponential backoff
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
