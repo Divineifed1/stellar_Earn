@@ -290,6 +290,20 @@ pub enum MetadataDescription {
     Hash(BytesN<32>),
 }
 
+/// Verifier stake for a specific quest.
+/// Deposited by the verifier before they can approve submissions.
+/// Slashed proportionally when a dispute resolves against them; returned otherwise.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct VerifierStake {
+    /// Token used for the stake (must match quest reward_asset).
+    pub token: Address,
+    /// Amount currently held.
+    pub amount: u128,
+    /// Whether the stake is still active (not yet returned or fully slashed).
+    pub is_active: bool,
+}
+
 /// Administrative roles within the contract.
 #[contracttype]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

@@ -407,3 +407,17 @@ pub fn submission_revealed(env: &Env, quest_id: Symbol, submitter: Address, proo
     let data = (proof_hash,);
     env.events().publish(topics, data);
 }
+
+/// Emitted when a verifier deposits stake for a quest.
+pub fn verifier_stake_deposited(env: &Env, quest_id: Symbol, verifier: Address, amount: u128) {
+    let topics = (symbol_short!("vstk_dep"), quest_id, verifier);
+    let data = (amount,);
+    env.events().publish(topics, data);
+}
+
+/// Emitted when a verifier's stake is slashed due to a dispute ruling against them.
+pub fn verifier_stake_slashed(env: &Env, quest_id: Symbol, verifier: Address, slash_amount: u128) {
+    let topics = (symbol_short!("vstk_slsh"), quest_id, verifier);
+    let data = (slash_amount,);
+    env.events().publish(topics, data);
+}

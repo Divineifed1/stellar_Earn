@@ -2,7 +2,7 @@ use crate::errors::Error;
 use crate::types::{
     BadgeType, CreatorStats, EscrowBalances, EscrowInfo, EscrowMeta, OracleConfig, PlatformStats, Quest, 
     QuestMetadata, QuestMetadataCore, QuestMetadataExtended, QuestStatus, Role, Submission, 
-    SubmissionStatus, UserBadges, UserCore, Commitment
+    SubmissionStatus, UserBadges, UserCore, Commitment, VerifierStake
 };
 
 use crate::validation;
@@ -76,6 +76,8 @@ pub enum DataKey {
     Dispute(Symbol, Address),
     /// Commitment record for front-running prevention, keyed by (quest_id, submitter)
     Commitment(Symbol, Address),
+    /// Verifier stake keyed by (quest_id, verifier)
+    VerifierStake(Symbol, Address),
     /// Token balance for an address
     Balance(Address),
     /// Token allowance for (owner, spender)
@@ -1204,6 +1206,29 @@ pub fn delete_dispute(env: &Env, quest_id: &Symbol, initiator: &Address) {
     env.storage()
         .instance()
         .remove(&DataKey::Dispute(quest_id.clone(), initiator.clone()));
+}
+
+//================================================================================
+// Verifier Stake Storage Functions
+//================================================================================
+
+pub fn has_verifier_stake(env: &Env, quest_id: &Symbol, verifier: &Address) -> bool {
+    env.storage()
+        .instance()
+        .has(&DataKey::VerifierStake(quest_id.clone(), verifier.clone()))
+}
+
+pub fn get_verifier_stake(env: &Env, quest_id: &Symbol, verifier: &Address) -> Result<VerifierStake, Error> {
+    env.storage()
+        .instance()
+        .get(&DataKey::VerifierStake(quest_id.clone(), verifier.clone()))
+        .ok_or(Error::VerifierStakeNotFound)
+}
+
+pub fn set_verifier_stake(env: &Env, quest_id: &Symbol, verifier: &Address, stake: &VerifierStake) {
+    env.storage()
+        .instance()
+        .set(&DataKey::VerifierStake(quest_id.clone(), verifier.clone()), stake);
 }
 
 //================================================================================

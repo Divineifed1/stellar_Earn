@@ -13,7 +13,7 @@ use soroban_sdk::{token, Address, Env, Symbol};
 use crate::errors::Error;
 use crate::events;
 use crate::storage;
-use crate::types::{EscrowBalances, EscrowInfo, EscrowMeta, QuestStatus};
+use crate::types::{EscrowBalances, EscrowInfo, EscrowMeta, QuestStatus, VerifierStake};
 use crate::validation;
 
 fn available_balance(balances: &EscrowBalances) -> i128 {
@@ -378,4 +378,143 @@ pub fn get_balance(env: &Env, quest_id: &Symbol) -> Result<i128, Error> {
 /// Get full EscrowInfo view — assembles from both split entries.
 pub fn get_info(env: &Env, quest_id: &Symbol) -> Result<EscrowInfo, Error> {
     storage::get_escrow(env, quest_id)
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VERIFIER STAKE: Deposit stake before verifying; return if no dispute
+// ═══════════════════════════════════════════════════════════════
+
+/// Deposits a verifier stake for a quest.
+///
+/// The verifier must call this before approving any submission.
+/// Stake is held in the contract until the quest completes (returned) or
+/// a dispute resolves against the verifier (slashed).
+///
+/// # Arguments
+///
+/// * `env` - The contract environment.
+/// * `quest_id` - The quest being staked on.
+/// * `verifier` - The verifier depositing the stake.
+/// * `token_address` - Token to stake (must match quest reward_asset).
+/// * `amount` - Amount to stake (u128; must be > 0).
+pub fn deposit_verifier_stake(
+    env: &Env,
+    quest_id: &Symbol,
+    verifier: &Address,
+    token_address: &Address,
+    amount: u128,
+) -> Result<(), Error> {
+    if amount == 0 {
+        return Err(Error::InvalidRewardAmount);
+    }
+
+    let quest = storage::get_quest(env, quest_id)?;
+    if *token_address != quest.reward_asset {
+        return Err(Error::TokenMismatch);
+    }
+    if validation::is_quest_terminal(&quest.status) {
+        return Err(Error::QuestNotActive);
+    }
+
+    // CEI: write stake record before external token transfer
+    let stake = VerifierStake {
+        token: token_address.clone(),
+        amount,
+        is_active: true,
+    };
+    storage::set_verifier_stake(env, quest_id, verifier, &stake);
+
+    events::verifier_stake_deposited(env, quest_id.clone(), verifier.clone(), amount);
+
+    let signed_amount = amount as i128;
+    let token_client = token::Client::new(env, token_address);
+    match token_client.try_transfer(verifier, &env.current_contract_address(), &signed_amount) {
+        Ok(Ok(_)) => Ok(()),
+        _ => Err(Error::TransferFailed),
+    }
+}
+
+/// Returns a verifier's stake back to them (called when quest completes without dispute).
+///
+/// Sends the full staked amount back to the verifier and marks the stake inactive.
+pub fn return_verifier_stake(
+    env: &Env,
+    quest_id: &Symbol,
+    verifier: &Address,
+) -> Result<(), Error> {
+    let mut stake = storage::get_verifier_stake(env, quest_id, verifier)?;
+    if !stake.is_active {
+        return Err(Error::VerifierStakeInactive);
+    }
+
+    let amount = stake.amount as i128;
+    stake.is_active = false;
+    storage::set_verifier_stake(env, quest_id, verifier, &stake);
+
+    if amount > 0 {
+        let token_client = token::Client::new(env, &stake.token);
+        match token_client.try_transfer(&env.current_contract_address(), verifier, &amount) {
+            Ok(Ok(_)) => Ok(()),
+            _ => Err(Error::TransferFailed),
+        }
+    } else {
+        Ok(())
+    }
+}
+
+/// Slashes a verifier's stake proportionally.
+///
+/// Called from the dispute resolution path when the dispute resolves against
+/// the verifier's decision. `slash_bps` is the slash proportion in basis points
+/// (e.g. 10_000 = 100%, 5_000 = 50%).
+///
+/// Returns the amount slashed (transferred to `slash_recipient`).
+pub fn slash_verifier_stake(
+    env: &Env,
+    quest_id: &Symbol,
+    verifier: &Address,
+    slash_bps: u32,       // 0–10_000
+    slash_recipient: &Address,
+) -> Result<u128, Error> {
+    let mut stake = storage::get_verifier_stake(env, quest_id, verifier)?;
+    if !stake.is_active {
+        return Err(Error::VerifierStakeInactive);
+    }
+
+    let slash_amount = (stake.amount * slash_bps as u128) / 10_000;
+    let remainder = stake.amount - slash_amount;
+
+    stake.amount = 0;
+    stake.is_active = false;
+    storage::set_verifier_stake(env, quest_id, verifier, &stake);
+
+    let token_client = token::Client::new(env, &stake.token);
+
+    // Transfer slashed portion to recipient
+    if slash_amount > 0 {
+        match token_client.try_transfer(
+            &env.current_contract_address(),
+            slash_recipient,
+            &(slash_amount as i128),
+        ) {
+            Ok(Ok(_)) => {}
+            _ => return Err(Error::TransferFailed),
+        }
+    }
+
+    // Return remainder to verifier
+    if remainder > 0 {
+        match token_client.try_transfer(
+            &env.current_contract_address(),
+            verifier,
+            &(remainder as i128),
+        ) {
+            Ok(Ok(_)) => {}
+            _ => return Err(Error::TransferFailed),
+        }
+    }
+
+    events::verifier_stake_slashed(env, quest_id.clone(), verifier.clone(), slash_amount);
+
+    Ok(slash_amount)
 }

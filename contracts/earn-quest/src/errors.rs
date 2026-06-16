@@ -143,4 +143,10 @@ pub enum Error {
 
     // Payout Errors
     InvalidClaimAmount = 143,
+
+    // Verifier Stake Errors
+    /// No stake found for the verifier on this quest.
+    VerifierStakeNotFound = 144,
+    /// Stake is no longer active (already returned or slashed).
+    VerifierStakeInactive = 145,
 }

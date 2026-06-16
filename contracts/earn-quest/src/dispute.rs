@@ -3,6 +3,7 @@ use crate::storage;
 use crate::validation;
 use crate::events;
 use crate::admin;
+use crate::escrow;
 use soroban_sdk::{Address, Env, Symbol};
 
 use super::types::{Dispute, DisputeStatus};
@@ -76,6 +77,8 @@ pub fn open_dispute(
 /// * `quest_id` - The symbol of the quest.
 /// * `initiator` - The address of the dispute initiator.
 /// * `arbitrator` - The address of the arbitrator resolving the dispute.
+/// * `upheld` - `true` if the dispute is upheld (verifier was wrong); triggers stake slash.
+/// * `slash_bps` - Basis points to slash from verifier stake (0–10_000). Ignored when `upheld` is false.
 ///
 /// # Returns
 ///
@@ -87,6 +90,8 @@ pub fn resolve_dispute(
     quest_id: Symbol,
     initiator: Address,
     arbitrator: Address,
+    upheld: bool,
+    slash_bps: u32,
 ) -> Result<(), Error> {
     // Auth: arbitrator must sign
     arbitrator.require_auth();
@@ -107,6 +112,15 @@ pub fn resolve_dispute(
             admin::require_admin(env, &arbitrator)?;
         }
         _ => return Err(Error::DisputeNotPending),
+    }
+
+    // Slash verifier stake when dispute is upheld (verifier was wrong)
+    if upheld && slash_bps > 0 {
+        let quest = storage::get_quest(env, &quest_id)?;
+        if storage::has_verifier_stake(env, &quest_id, &quest.verifier) {
+            // Slashed funds go to the dispute initiator
+            escrow::slash_verifier_stake(env, &quest_id, &quest.verifier, slash_bps, &initiator)?;
+        }
     }
 
     // Update status to Resolved

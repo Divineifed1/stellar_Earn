@@ -27,7 +27,7 @@ pub use crate::types::{
     AggregatedPrice, Badge, BadgeType, BatchApprovalInput, BatchQuestInput, CreatorStats, Dispute,
     DisputeStatus, EscrowInfo, OracleConfig, PlatformStats, PriceData, PriceFeedRequest, Quest,
     QuestMetadata, QuestStatus, Role, Submission, SubmissionStatus, UserBadges, UserCore,
-    UserStats, Commitment,
+    UserStats, Commitment, VerifierStake,
 };
 
 
@@ -631,14 +631,18 @@ impl EarnQuestContract {
     /// * `quest_id` - The symbol of the quest.
     /// * `initiator` - The address of the dispute initiator.
     /// * `arbitrator` - The address of the arbitrator resolving the dispute.
+    /// * `upheld` - Whether the dispute is upheld (verifier was wrong); triggers stake slash.
+    /// * `slash_bps` - Basis points (0–10_000) to slash from verifier stake if upheld.
     pub fn resolve_dispute(
         env: Env,
         quest_id: Symbol,
         initiator: Address,
         arbitrator: Address,
+        upheld: bool,
+        slash_bps: u32,
     ) -> Result<(), Error> {
         security::require_not_paused(&env)?;
-        dispute::resolve_dispute(&env, quest_id, initiator, arbitrator)
+        dispute::resolve_dispute(&env, quest_id, initiator, arbitrator, upheld, slash_bps)
     }
 
 
@@ -783,6 +787,56 @@ impl EarnQuestContract {
         security::nonreentrant_enter(&env)?;
         depositor.require_auth();
         escrow::deposit(&env, &quest_id, &depositor, &token, amount)?;
+        security::nonreentrant_exit(&env);
+        Ok(())
+    }
+
+    /// Deposits a verifier stake for a quest (Verifier only).
+    ///
+    /// The verifier must hold an active stake before approving submissions.
+    /// Stake is slashed proportionally if a dispute resolves against them,
+    /// and returned in full if the quest completes without dispute.
+    ///
+    /// # Arguments
+    ///
+    /// * `env` - The environment.
+    /// * `quest_id` - The symbol of the quest.
+    /// * `verifier` - The verifier depositing the stake.
+    /// * `token` - Token address (must match quest reward_asset).
+    /// * `amount` - Amount to stake.
+    pub fn deposit_verifier_stake(
+        env: Env,
+        quest_id: Symbol,
+        verifier: Address,
+        token: Address,
+        amount: u128,
+    ) -> Result<(), Error> {
+        security::require_not_paused(&env)?;
+        security::nonreentrant_enter(&env)?;
+        verifier.require_auth();
+        escrow::deposit_verifier_stake(&env, &quest_id, &verifier, &token, amount)?;
+        security::nonreentrant_exit(&env);
+        Ok(())
+    }
+
+    /// Returns a verifier's stake for a completed quest (Creator or Admin).
+    ///
+    /// Call this once a quest reaches a terminal state with no outstanding disputes.
+    pub fn return_verifier_stake(
+        env: Env,
+        quest_id: Symbol,
+        verifier: Address,
+        caller: Address,
+    ) -> Result<(), Error> {
+        security::require_not_paused(&env)?;
+        security::nonreentrant_enter(&env)?;
+        caller.require_auth();
+        // Only quest creator or admin may trigger the return
+        let quest = crate::storage::get_quest(&env, &quest_id)?;
+        if caller != quest.creator {
+            admin::require_admin(&env, &caller)?;
+        }
+        escrow::return_verifier_stake(&env, &quest_id, &verifier)?;
         security::nonreentrant_exit(&env);
         Ok(())
     }
