@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
   ForbiddenException,
@@ -10,7 +11,7 @@ import { Repository } from 'typeorm';
 import { Submission } from './entities/submission.entity';
 import { ApproveSubmissionDto } from './dto/approve-submission.dto';
 import { RejectSubmissionDto } from './dto/reject-submission.dto';
-// import { StellarService } from '../stellar/stellar.service';
+import { StellarService } from '../stellar/stellar.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { Quest } from '../quests/entities/quest.entity';
 import { User } from '../users/entities/user.entity';
@@ -33,10 +34,12 @@ import { SubmissionApprovedEvent } from '../../events/dto/submission-approved.ev
 
 @Injectable()
 export class SubmissionsService {
+  private readonly logger = new Logger(SubmissionsService.name);
+
   constructor(
     @InjectRepository(Submission)
     private submissionsRepository: Repository<Submission>,
-    // private stellarService: StellarService,
+    private stellarService: StellarService,
     private notificationsService: NotificationsService,
     private eventEmitter: EventEmitter2,
     private metricsService: MetricsService,
@@ -100,23 +103,52 @@ export class SubmissionsService {
       );
     }
 
+    // Capture the row's pre-approval status so we can roll back reliably if
+    // the on-chain call fails. Anything in `approveDto` that we already
+    // persisted (notes, etc.) is intentionally left in place — notes are
+    // verifier context, not approval state, and losing them on chain error
+    // would be more harmful than keeping them.
+    const previousStatus = submission.status;
+
+    let onChainTxHash: string | undefined;
     try {
-      // await this.stellarService.approveSubmission(
-      //   quest.contractTaskId,
-      //   user.stellarAddress,
-      //   quest.rewardAmount,
-      // );
+      const onChainResult = await this.stellarService.approveSubmission(
+        quest.contractTaskId,
+        user.stellarAddress,
+        verifierId,
+      );
+      onChainTxHash = onChainResult.transactionHash;
     } catch (error) {
+      // Roll the DB status back so the submission remains actionable.
+      // We deliberately keep verifierNotes (verifier's review context)
+      // and approvedAt/approvedBy cleared, which yields the same
+      // observable state as if the call had never been attempted.
       await this.submissionsRepository.update(submissionId, {
-        status: submission.status,
+        status: previousStatus,
         approvedBy: undefined,
         approvedAt: undefined,
       });
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `On-chain approve_submission failed for submission=${submissionId}: ${errorMessage}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      this.metricsService.incrementCounter(
+        'submission_approval_chain_failure_total',
+      );
+      // Re-throw with the typed exception the caller expects; preserve the
+      // underlying message so operators can diagnose from the API response.
       throw new BadRequestException(
         `Failed to process on-chain approval: ${errorMessage}`,
       );
+    }
+
+    if (onChainTxHash) {
+      await this.submissionsRepository.update(submissionId, {
+        transactionHash: onChainTxHash,
+      });
+      submission.transactionHash = onChainTxHash;
     }
 
     // Apply the persisted changes to the in-memory entity instead of

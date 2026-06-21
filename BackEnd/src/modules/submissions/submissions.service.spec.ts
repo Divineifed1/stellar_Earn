@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { BadRequestException } from '@nestjs/common';
 import { SubmissionsService } from './submissions.service';
 import { Submission } from './entities/submission.entity';
 import { NotificationsService } from '../notifications/notifications.service';
+import { StellarService } from '../stellar/stellar.service';
 import { SubmissionBuilder } from '../../../test/utils/submission.builder';
 
 const buildUpdateBuilder = (affected = 1) => {
@@ -23,6 +25,7 @@ describe('SubmissionsService (N+1 prevention)', () => {
     sendSubmissionApproved: jest.Mock;
     sendSubmissionRejected: jest.Mock;
   };
+  let stellarService: { approveSubmission: jest.Mock };
 
   const buildSubmission = () =>
     new SubmissionBuilder()
@@ -58,11 +61,20 @@ describe('SubmissionsService (N+1 prevention)', () => {
       sendSubmissionRejected: jest.fn().mockResolvedValue(undefined),
     };
 
+    stellarService = {
+      approveSubmission: jest.fn().mockResolvedValue({
+        transactionHash: 'mock-tx-hash-001',
+        ledger: 42,
+        success: true,
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SubmissionsService,
         { provide: getRepositoryToken(Submission), useValue: submissionsRepo },
         { provide: NotificationsService, useValue: notifications },
+        { provide: StellarService, useValue: stellarService },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
       ],
     }).compile();
@@ -107,6 +119,81 @@ describe('SubmissionsService (N+1 prevention)', () => {
       expect(result.status).toBe('APPROVED');
       expect(result.approvedBy).toBe('verifier-1');
       expect(result.verifierNotes).toBe('looks good');
+    });
+
+    it('invokes StellarService.approveSubmission with the quest id, submitter, and verifier after the DB CAS update', async () => {
+      const submission = buildSubmission();
+      submissionsRepo.findOne.mockResolvedValue(submission);
+      submissionsRepo.createQueryBuilder =
+        buildUpdateBuilder().createQueryBuilder;
+
+      await service.approveSubmission(
+        'sub-1',
+        { notes: 'looks good' },
+        'verifier-1',
+      );
+
+      expect(stellarService.approveSubmission).toHaveBeenCalledTimes(1);
+      expect(stellarService.approveSubmission).toHaveBeenCalledWith(
+        submission.quest.contractTaskId,
+        submission.user.stellarAddress,
+        'verifier-1',
+      );
+    });
+
+    it('persists the on-chain transaction hash on the submission record', async () => {
+      const submission = buildSubmission();
+      submissionsRepo.findOne.mockResolvedValue(submission);
+      submissionsRepo.createQueryBuilder =
+        buildUpdateBuilder().createQueryBuilder;
+
+      await service.approveSubmission(
+        'sub-1',
+        { notes: 'ok' },
+        'verifier-1',
+      );
+
+      // The tx-hash write happens AFTER the chain call, with the tx hash
+      // returned by StellarService.approveSubmission.
+      expect(submissionsRepo.update).toHaveBeenCalledWith(
+        'sub-1',
+        expect.objectContaining({ transactionHash: 'mock-tx-hash-001' }),
+      );
+    });
+
+    it('rolls DB status back and throws BadRequest when the chain call fails', async () => {
+      const submission = buildSubmission();
+      submissionsRepo.findOne.mockResolvedValue(submission);
+      submissionsRepo.createQueryBuilder =
+        buildUpdateBuilder().createQueryBuilder;
+      stellarService.approveSubmission.mockRejectedValueOnce(
+        new BadRequestException(
+          'Contract rejected approve_submission: QuestNotFound',
+        ),
+      );
+
+      await expect(
+        service.approveSubmission('sub-1', { notes: 'ok' }, 'verifier-1'),
+      ).rejects.toThrow(BadRequestException);
+
+      // Status reverts and approvedBy/approvedAt are cleared. verifierNotes
+      // is intentionally preserved (verifier's review context, not approval
+      // state).
+      expect(submissionsRepo.update).toHaveBeenCalledWith(
+        'sub-1',
+        expect.objectContaining({
+          status: 'PENDING',
+          approvedBy: undefined,
+          approvedAt: undefined,
+        }),
+      );
+      // The submission should NOT have been marked PAID or have a tx hash.
+      expect(submissionsRepo.update).not.toHaveBeenCalledWith(
+        'sub-1',
+        expect.objectContaining({ transactionHash: expect.anything() }),
+      );
+      // Approval notification must NOT have been sent on a failed chain call.
+      expect(notifications.sendSubmissionApproved).not.toHaveBeenCalled();
     });
   });
 
