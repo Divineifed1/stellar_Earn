@@ -1025,6 +1025,21 @@ impl EarnQuestContract {
         storage::get_submission(&env, &quest_id, &submitter)
     }
 
+    /// Withdraw a rejected submission.
+    ///
+    /// Allows the submitter to retract their rejected submission and then
+    /// re-submit later (until the quest deadline).
+    pub fn withdraw_submission(
+        env: Env,
+        quest_id: Symbol,
+        caller: Address,
+    ) -> Result<(), Error> {
+        security::require_not_paused(&env)?;
+        caller.require_auth();
+        submission::withdraw_submission(&env, &quest_id, &caller)
+    }
+
+
     /// Sets the number of approvals required to unpause the contract (Admin only).
     pub fn set_unpause_threshold(env: Env, caller: Address, threshold: u32) -> Result<(), Error> {
         security::set_unpause_threshold(&env, &caller, threshold)

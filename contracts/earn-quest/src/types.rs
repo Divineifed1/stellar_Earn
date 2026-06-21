@@ -76,6 +76,8 @@ pub enum SubmissionStatus {
     Rejected,
     /// Reward has been successfully claimed.
     Paid,
+    /// Submitter withdrew after rejection (re-submission allowed).
+    Withdrawn,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

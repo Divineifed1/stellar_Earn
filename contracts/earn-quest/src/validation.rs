@@ -305,6 +305,8 @@ pub fn validate_submission_status_transition(
         (SubmissionStatus::Approved, SubmissionStatus::Paid) => true,
         (SubmissionStatus::PartiallyPaid, SubmissionStatus::PartiallyPaid) => true,
         (SubmissionStatus::PartiallyPaid, SubmissionStatus::Paid) => true,
+        (SubmissionStatus::Rejected, SubmissionStatus::Withdrawn) => true,
+        (SubmissionStatus::Withdrawn, SubmissionStatus::Pending) => true,
         _ => false,
     };
 

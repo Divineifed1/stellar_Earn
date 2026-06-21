@@ -30,6 +30,7 @@ const TOPIC_ESCROW_PAYOUT: Symbol = symbol_short!("esc_pay");
 const TOPIC_ESCROW_REFUNDED: Symbol = symbol_short!("esc_ref");
 const TOPIC_COMMITMENT_SUBMITTED: Symbol = symbol_short!("com_sub");
 const TOPIC_SUBMISSION_REVEALED: Symbol = symbol_short!("sub_rev");
+const TOPIC_SUBMISSION_WITHDRAWN: Symbol = symbol_short!("sub_wd");
 
 // ═══════════════════════════════════════════════════════════════
 // Enhanced Event Emission with Indexing for Subgraph/Indexer Integration
@@ -407,6 +408,14 @@ pub fn submission_revealed(env: &Env, quest_id: Symbol, submitter: Address, proo
     let data = (proof_hash,);
     env.events().publish(topics, data);
 }
+
+/// Emitted when a submitter withdraws a rejected submission (indexed: quest_id, submitter). 
+pub fn submission_withdrawn(env: &Env, quest_id: Symbol, submitter: Address) {
+    let topics = (TOPIC_SUBMISSION_WITHDRAWN, quest_id, submitter);
+    let data = ();
+    env.events().publish(topics, data);
+}
+
 
 /// Emitted when a verifier deposits stake for a quest.
 pub fn verifier_stake_deposited(env: &Env, quest_id: Symbol, verifier: Address, amount: u128) {

@@ -182,7 +182,7 @@ fn test_user_stats_persist_across_simulated_upgrade() {
     let user = Address::generate(&env);
 
     // Grant badge before "upgrade"
-    client.grant_badge(&admin, &user, &Badge::rookie(&env));
+    client.grant_badge(&admin, &user, &Badge::Rookie);
 
     // Simulate upgrade
     let client_after_upgrade = EarnQuestContractClient::new(&env, &contract_id);
@@ -193,7 +193,7 @@ fn test_user_stats_persist_across_simulated_upgrade() {
 
     let badges = client_after_upgrade.get_user_badges(&user);
     assert_eq!(badges.badges.len(), 1);
-    assert_eq!(badges.badges.get(0).unwrap(), Badge::rookie(&env));
+    assert_eq!(badges.badges.get(0).unwrap(), Badge::Rookie);
 }
 
 #[test]
@@ -353,7 +353,7 @@ fn test_storage_schema_compatibility() {
         &deadline,
     );
 
-    client.grant_badge(&admin, &creator, &Badge::explorer(&env));
+    client.grant_badge(&admin, &creator, &Badge::Explorer);
 
     // Simulate upgrade
     let client_after = EarnQuestContractClient::new(&env, &contract_id);
@@ -513,7 +513,7 @@ fn test_contract_state_recoverable() {
         &deadline,
     );
 
-    client.grant_badge(&admin, &user, &Badge::veteran(&env));
+    client.grant_badge(&admin, &user, &Badge::Veteran);
     client.add_admin(&admin, &creator);
 
     // Simulate "rollback" by creating new client (same contract)
@@ -703,7 +703,7 @@ fn test_full_migration_workflow() {
 
     let proof_hash = soroban_sdk::BytesN::from_array(&env, &[1u8; 32]);
     client.submit_proof(&quest_id, &submitter, &proof_hash);
-    client.grant_badge(&admin, &submitter, &Badge::rookie(&env));
+    client.grant_badge(&admin, &submitter, &Badge::Rookie);
 
     // Phase 2: Authorize upgrade
     let auth_result = client.try_authorize_upgrade(&admin);

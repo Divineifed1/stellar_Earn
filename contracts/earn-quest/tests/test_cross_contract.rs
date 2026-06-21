@@ -327,7 +327,7 @@ fn test_earn_quest_with_oracle_integration() {
         oracle_type: OracleType::StellarOracle,
         max_age_seconds: 300,
         min_confidence: 80,
-        is_active: true,
+          is_active: true,
     };
 
     earn_quest_client.add_oracle(&admin, &oracle_config);
@@ -730,7 +730,7 @@ fn test_multi_contract_coordination() {
         oracle_type: OracleType::StellarOracle,
         max_age_seconds: 300,
         min_confidence: 80,
-        is_active: true,
+          is_active: true,
     };
     earn_quest_client.add_oracle(&admin, &oracle_config);
 
