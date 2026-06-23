@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import {
   NotificationLog,
   DeliveryStatus,
-} from './entities/notification-log.entity';
-import { ChannelType } from './channels/notification-channel.interface';
+} from '../entities/notification-log.entity';
+import { ChannelType } from '../channels/notification-channel.interface';
 
 @Injectable()
 export class NotificationAnalyticsService {

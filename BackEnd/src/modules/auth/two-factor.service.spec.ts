@@ -6,9 +6,9 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { TwoFactorService } from '../services/two-factor.service';
-import { TotpService } from '../services/totp.service';
-import { TwoFactorAuth } from '../entities/two-factor.entity';
+import { TwoFactorService } from './services/two-factor.service';
+import { TotpService } from './services/totp.service';
+import { TwoFactorAuth } from './entities/two-factor.entity';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers

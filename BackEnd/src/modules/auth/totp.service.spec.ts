@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { TotpService } from '../services/totp.service';
+import { TotpService } from './services/totp.service';
 import { authenticator } from 'otplib';
 
 describe('TotpService', () => {
