@@ -58,6 +58,9 @@ jobs:
       - name: Run tests
         run: cargo test
 
+      - name: Run gas regression check
+        run: cargo test test_gas_regression -- --nocapture
+
       - name: Format check
         run: cargo fmt --all -- --check
 
