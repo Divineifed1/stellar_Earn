@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { ISubmissionApprovedEvent } from '../../../events/interfaces/submission-events.interface';
-import { UserService } from '../user.service';
+import { UsersService } from '../users.service';
 import { EventStore } from '../../../events/entities/event-store.entity';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class UserExperienceListener {
 
   constructor(
     private readonly eventEmitter: EventEmitter2,
-    private readonly userService: UserService,
+    private readonly userService: UsersService,
   ) {}
 
   @OnEvent('submission.approved', { async: true })

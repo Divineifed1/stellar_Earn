@@ -1,6 +1,6 @@
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserExperienceListener } from '../../src/modules/users/events/user-experience.listener';
-import { UserService } from '../../src/modules/users/user.service';
+import { UserService } from '../../src/modules/users/users.service';
 import { EventStore } from '../../src/events/entities/event-store.entity';
 
 describe('UserExperienceListener atomicity across service boundaries', () => {

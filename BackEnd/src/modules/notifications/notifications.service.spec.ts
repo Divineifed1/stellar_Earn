@@ -3,9 +3,9 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { getQueueToken } from '@nestjs/bullmq';
 import { NotificationsService } from './notifications.service';
 import { Notification } from './entities/notification.entity';
-import { NotificationPreference } from './entities/notificationPreference.entity';
+import { NotificationPreference } from './entities/notification-preference.entity';
 import { NotificationLog } from './entities/notification-log.entity';
-import { NotificationTemplateService } from './templates/notification-template.service';
+import { NotificationTemplateService } from './template/notification-template.service';
 
 const buildUpdateBuilder = (
   raw: Array<{ id: string }> = [],

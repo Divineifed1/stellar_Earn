@@ -1,10 +1,10 @@
 ﻿import { NotFoundException } from '@nestjs/common';
-import { ExecutionTraceService } from '#src/modules/trace/execution-trace.service';
+import { TraceService } from '#src/modules/trace/trace.service';
 import { TraceIdUtil } from '#src/modules/trace/trace-id.util';
 import { TraceStatus } from '#src/modules/trace/trace.types';
 
 const makeDto = (
-  overrides?: Partial<Parameters<ExecutionTraceService['createTrace']>[0]>,
+  overrides?: Partial<Parameters<TraceService['createTrace']>[0]>,
 ) => ({
   traceId: TraceIdUtil.generate('delivery-001'),
   webhookEventId: 'delivery-001',
@@ -13,11 +13,11 @@ const makeDto = (
   ...overrides,
 });
 
-describe('ExecutionTraceService', () => {
-  let service: ExecutionTraceService;
+describe('TraceService', () => {
+  let service: TraceService;
 
   beforeEach(() => {
-    service = new ExecutionTraceService();
+    service = new TraceService();
   });
 
   // â”€â”€ createTrace â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

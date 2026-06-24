@@ -30,7 +30,7 @@ import {
   WebhookResponseDto,
   WebhookHealthResponseDto,
 } from './dto/webhook-response.dto';
-import { ExecutionTraceService } from '../trace/execution-trace.service';
+import { TraceService } from '../trace/trace.service';
 import { TraceIdUtil } from '../trace/trace-id.util';
 import {
   TraceContextStorage,
@@ -45,7 +45,7 @@ export class WebhooksController {
 
   constructor(
     private readonly webhooksService: WebhooksService,
-    private readonly traceService: ExecutionTraceService,
+    private readonly traceService: TraceService,
   ) {}
 
   private verifyWebhookRequest(

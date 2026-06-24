@@ -15,7 +15,7 @@ import { NotificationsModule } from '#src/modules/notifications/notifications.mo
 
 // Import services
 import { AuthService } from '#src/modules/auth/auth.service';
-import { UsersService } from '#src/modules/users/user.service';
+import { UsersService } from '#src/modules/users/users.service';
 import { QuestsService } from '#src/modules/quests/quests.service';
 import { SubmissionsService } from '#src/modules/submissions/submissions.service';
 import { PayoutsService } from '#src/modules/payouts/payouts.service';

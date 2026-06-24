@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UserService } from '../../src/modules/users/user.service';
+import { UserService } from '../../src/modules/users/users.service';
 import { User } from '../../src/modules/users/entities/user.entity';
 import { EventStore } from '../../src/events/entities/event-store.entity';
 
