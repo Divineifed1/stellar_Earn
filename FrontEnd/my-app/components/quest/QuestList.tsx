@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { QuestCard } from './QuestCard';
 import { EmptyQuestState } from './EmptyQuestState';
 import type { Quest } from '@/lib/types/quest';

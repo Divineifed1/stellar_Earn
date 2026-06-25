@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { QuestStatus, QuestDifficulty } from '@/lib/types/quest';
 
 interface FilterPanelProps {
