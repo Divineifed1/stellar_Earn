@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom/vitest';
 process.env.NEXT_PUBLIC_API_BASE_URL = 'http://localhost:3000';
 
 import { cleanup } from '@testing-library/react';
@@ -82,5 +81,6 @@ declare module 'vitest' {
     toHaveClass(...args: unknown[]): void;
     toHaveAttribute(...args: unknown[]): void;
     toBeDisabled(...args: unknown[]): void;
+    toHaveFocus(): void;
   }
 }
