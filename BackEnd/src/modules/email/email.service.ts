@@ -87,9 +87,9 @@ export class EmailService implements OnModuleInit {
     }
   }
 
-  async sendEmail(
+  sendEmail(
     dto: SendEmailDto,
-  ): Promise<{ messageId: string; status: EmailStatus }> {
+  ): { messageId: string; status: EmailStatus } {
     const filteredRecipients = this.filterUnsubscribed(dto.to);
 
     if (filteredRecipients.length === 0) {
