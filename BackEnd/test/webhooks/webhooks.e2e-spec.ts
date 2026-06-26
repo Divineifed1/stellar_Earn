@@ -177,7 +177,11 @@ describe('WebhooksController (e2e)', () => {
 
     it('should reject missing webhook timestamp', () => {
       const payload = { test: 'data' };
-      const signature = generateWebhookSignature(payload, githubSecret, 'github');
+      const signature = generateWebhookSignature(
+        payload,
+        githubSecret,
+        'github',
+      );
 
       return request(app.getHttpServer())
         .post('/webhooks/github')
@@ -193,18 +197,27 @@ describe('WebhooksController (e2e)', () => {
 
     it('should reject expired timestamp (replay attack)', () => {
       const payload = { test: 'data' };
-      const signature = generateWebhookSignature(payload, githubSecret, 'github');
+      const signature = generateWebhookSignature(
+        payload,
+        githubSecret,
+        'github',
+      );
 
       return request(app.getHttpServer())
         .post('/webhooks/github')
         .set('X-GitHub-Event', 'push')
         .set('X-GitHub-Delivery', 'test-delivery-id')
         .set('X-Hub-Signature-256', signature)
-        .set('X-Webhook-Timestamp', Math.floor((Date.now() - 10 * 60 * 1000) / 1000).toString())
+        .set(
+          'X-Webhook-Timestamp',
+          Math.floor((Date.now() - 10 * 60 * 1000) / 1000).toString(),
+        )
         .send(payload)
         .expect(401)
         .expect((res) => {
-          expect(res.body.message).toContain('Webhook timestamp expired or invalid');
+          expect(res.body.message).toContain(
+            'Webhook timestamp expired or invalid',
+          );
         });
     });
   });

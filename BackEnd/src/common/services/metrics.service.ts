@@ -113,11 +113,13 @@ export class MetricsService implements OnModuleInit, OnModuleDestroy {
       lines.push(`# HELP ${name} ${metric.help}`);
       lines.push(`# TYPE ${name} ${metric.type}`);
 
-      if (metric.type === 'counter' || metric.type === 'gauge') {
-        for (const [labelStr, value] of metric.values) {
-          lines.push(`${name}${labelStr ? `{${labelStr}}` : ''} ${value}`);
-        }
-      } else if (metric.type === 'histogram') {
+if (metric.type === 'counter' || metric.type === 'gauge') {
+         for (const [labelStr, value] of metric.values) {
+           lines.push(`${name}${labelStr ? `{${labelStr}}` : ''} ${value}`);
+         }
+       } else {
+         // 'histogram' is the only remaining option in the union type
+         for (const [labelStr, entry] of metric.data) {
         for (const [labelStr, entry] of metric.data) {
           const base = labelStr ? `,${labelStr}` : '';
           let cumulative = 0;
@@ -159,11 +161,14 @@ export class MetricsService implements OnModuleInit, OnModuleDestroy {
       metrics: {},
     };
 
-    for (const [name, metric] of this.registry) {
-      if (metric.type === 'counter' || metric.type === 'gauge') {
-        (snapshot.metrics as Record<string, unknown>)[name] =
-          Object.fromEntries(metric.values);
-      } else if (metric.type === 'histogram') {
+for (const [name, metric] of this.registry) {
+       if (metric.type === 'counter' || metric.type === 'gauge') {
+         (snapshot.metrics as Record<string, unknown>)[name] =
+           Object.fromEntries(metric.values);
+       } else {
+         // 'histogram' is the only remaining option in the union type
+         const histData: Record<string, unknown> = {};
+         for (const [labelStr, entry] of metric.data) {
         const histData: Record<string, unknown> = {};
         for (const [labelStr, entry] of metric.data) {
           histData[labelStr || '_total'] = {

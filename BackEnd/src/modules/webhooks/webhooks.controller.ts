@@ -69,7 +69,9 @@ export class WebhooksController {
       timestampHeader,
     );
     if (!result.valid) {
-      throw new UnauthorizedException(result.reason || 'Invalid webhook signature');
+      throw new UnauthorizedException(
+        result.reason || 'Invalid webhook signature',
+      );
     }
   }
 
@@ -219,8 +221,9 @@ export class WebhooksController {
     if (!webhookId)
       throw new BadRequestException('Missing X-Webhook-ID header');
 
-    const apiSignature =
-      authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
+    const apiSignature = authHeader?.startsWith('Bearer ')
+      ? authHeader.substring(7)
+      : authHeader;
 
     this.verifyWebhookRequest(
       payload,

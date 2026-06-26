@@ -211,8 +211,7 @@ export class JobsService implements OnModuleInit, OnModuleDestroy {
         if (!job) return;
         const attempts = job.attemptsMade ?? 0;
         const maxAttempts =
-          (job.opts && (job.opts as any).attempts) ||
-          DEFAULT_JOB_OPTIONS.attempts;
+          (job.opts && job.opts.attempts) || DEFAULT_JOB_OPTIONS.attempts;
         if (attempts >= maxAttempts) {
           await this.queues[QUEUES.DEAD_LETTER].add(`${name}-dlq`, {
             failedJob: {
