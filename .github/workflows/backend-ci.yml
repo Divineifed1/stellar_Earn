@@ -1,5 +1,5 @@
 name: Backend CI
-
+# This workflow is triggered on push and pull request events for the main and master branches, specifically when changes are made to the BackEnd directory or the workflow file itself. It consists of two jobs: "build-and-lint" and "backend-ci-gate".
 on:
   push:
     branches: [main, master]
@@ -7,11 +7,10 @@ on:
       - "BackEnd/**"
       - ".github/workflows/backend-ci.yml"
   pull_request:
-    branches: [main, master]
     paths:
       - "BackEnd/**"
       - ".github/workflows/backend-ci.yml"
-
+# The workflow consists of two jobs: "build-and-lint" and "backend-ci-gate". The "build-and-lint" job is responsible for checking out the code, setting up Node.js, caching npm dependencies, installing dependencies, compiling TypeScript, linting the code, and checking code formatting. The "backend-ci-gate" job runs after the "build-and-lint" job and checks if all previous steps were successful. If any step fails, it will exit with an error message.
 jobs:
   build-and-lint:
     name: Build, Lint & Format
